@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STEEL BALL RUN — JoJo's Bizarre Adventure Part 7 Racing Game</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap');
+
+  :root {
+    --gold: #f5c542;
+    --gold-dark: #b8860b;
+    --magenta: #e6007e;
+    --cyan: #00d2ff;
+    --purple: #6b1fb1;
+    --ink: #120d1d;
+    --paper: #fdf6e3;
+    --crimson: #d91e36;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+  }
+
+  body {
+    background-color: var(--ink);
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Halftone & Manga Patterns */
+  .halftone {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1.5px, transparent 1.5px);
+    background-size: 12px 12px;
+  }
+
+  /* HEADER / TOP BAR */
+  header {
+    background: linear-gradient(90deg, #1b0b2e 0%, #3a0f5c 50%, #1b0b2e 100%);
+    border-bottom: 4px solid var(--gold);
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+  }
+
+  .title-group {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+
+  .main-title {
+    font-family: 'Bangers', cursive;
+    font-size: 2.1rem;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-shadow: 3px 3px 0px var(--magenta), -1px -1px 0 #000;
+  }
+
+  .subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--cyan);
+    letter-spacing: 1px;
+  }
+
+  .header-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  button.manga-btn {
+    font-family: 'Bangers', cursive;
+    font-size: 1.15rem;
+    letter-spacing: 1.5px;
+    padding: 6px 16px;
+    background: var(--gold);
+    color: var(--ink);
+    border: 3px solid #000;
+    box-shadow: 3px 3px 0 #000;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.15s;
+  }
+
+  button.manga-btn:hover {
+    background: #ffe074;
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 #000;
+  }
+
+  button.manga-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #000;
+  }
+
+  button.manga-btn.secondary {
+    background: var(--magenta);
+    color: #fff;
+  }
+
+  /* SCREENS */
+  .screen {
+    display: none;
+    flex: 1;
+    width: 100%;
+    height: calc(100vh - 58px);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .screen.active {
+    display: flex;
+  }
+
+  /* CHARACTER SELECT SCREEN */
+  #select-screen {
+    flex-direction: column;
+    background: radial-gradient(circle at top, #2c1247 0%, #11091c 85%);
+    padding: 14px 22px;
+    gap: 12px;
+  }
+
+  .select-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.55);
+    border: 3px solid var(--gold);
+    padding: 8px 18px;
+    box-shadow: 5px 5px 0 rgba(230, 0, 126, 0.6);
+  }
+
+  .select-top h2 {
+    font-family: 'Bangers', cursive;
+    font-size: 1.65rem;
+    letter-spacing: 2px;
+    color: #fff;
+    text-shadow: 2px 2px 0 var(--magenta);
+  }
+
+  .roster-layout {
+    display: grid;
+    grid-template-columns: 1fr 370px;
+    gap: 18px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* 14 Character Grid */
+  .roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    overflow-y: auto;
+    padding: 6px;
+    background: rgba(0,0,0,0.35);
+    border: 2px solid rgba(245, 197, 66, 0.35);
+  }
+
+  .roster-grid::-webkit-scrollbar {
+    width: 8px;
+  }
+  .roster-grid::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border: 1px solid #000;
+  }
+
+  .char-card {
+    background: linear-gradient(145deg, #241438, #140b21);
+    border: 3px solid #44315e;
+    padding: 8px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.14s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 3px 3px 0 #000;
+  }
+
+  .char-card:hover {
+    border-color: var(--cyan);
+    transform: translateY(-2px);
+  }
+
+  .char-card.selected {
+    border-color: var(--gold);
+    background: linear-gradient(145deg, #4b185a, #210c36);
+    box-shadow: 0 0 15px rgba(245, 197, 66, 0.7), 4px 4px 0 var(--magenta);
+    transform: scale(1.02);
+  }
+
+  .char-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #000;
+  }
+
+  .char-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 8px;
+    border: 2px solid #000;
+    margin: 0 auto 6px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bangers', cursive;
+    font-size: 1.65rem;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+    box-shadow: 2px 2px 0 #000;
+  }
+
+  .char-card-name {
+    font-family: 'Bangers', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    text-align: center;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  .char-card-stand {
+    font-size: 0.76rem;
+    text-align: center;
+    color: var(--cyan);
+    font-weight: 700;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  .char-card-horse {
+    font-size: 0.7rem;
+    text-align: center;
+    color: #ccc;
+    font-style: italic;
+  }
+
+  /* Character Inspector Panel */
+  .inspector-panel {
+    background: var(--paper);
+    color: var(--ink);
+    border: 4px solid #000;
+    box-shadow: 7px 7px 0 var(--magenta);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .inspector-header {
+    border-bottom: 3px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  .inspector-tag {
+    display: inline-block;
+    background: var(--magenta);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border: 2px solid #000;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .inspector-name {
+    font-family: 'Bangers', cursive;
+    font-size: 2.1rem;
+    line-height: 1;
+    color: var(--ink);
+    text-shadow: 2px 2px 0 var(--gold);
+  }
+
+  .inspector-stand {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--purple);
+    margin-top: 4px;
+  }
+
+  .inspector-mount {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    color: #444;
+  }
+
+  .stat-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 10px 0;
+  }
+
+  .stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .stat-track {
+    height: 12px;
+    background: #d8cfc0;
+    border: 2px solid #000;
+    overflow: hidden;
+  }
+
+  .stat-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--magenta), var(--purple));
+    transition: width 0.25s ease;
+  }
+
+  .ability-box {
+    background: #fff;
+    border: 3px solid #000;
+    padding: 10px;
+    box-shadow: 4px 4px 0 var(--gold);
+    margin-top: 6px;
+  }
+
+  .ability-title {
+    font-family: 'Bangers', cursive;
+    font-size: 1.2rem;
+    color: var(--crimson);
+    letter-spacing: 1px;
+  }
+
+  .ability-desc {
+    font-size: 0.86rem;
+    line-height: 1.35;
+    color: #222;
+    margin-top: 4px;
+  }
+
+  .start-race-btn {
+    width: 100%;
+    padding: 12px;
+    font-family: 'Bangers', cursive;
+    font-size: 1.65rem;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, var(--gold), #ffae00);
+    color: #000;
+    border: 4px solid #000;
+    box-shadow: 5px 5px 0 #000;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: transform 0.1s;
+  }
+
+  .start-race-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 #000;
+    background: #ffe066;
+  }
+
+  /* RACE SCREEN */
+  #race-screen {
+    flex-direction: column;
+    background: #000;
+  }
+
+  #gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* HUD OVERLAY */
+  #hud {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .hud-card {
+    background: rgba(18, 13, 29, 0.88);
+    border: 3px solid var(--gold);
+    padding: 8px 14px;
+    box-shadow: 4px 4px 0 #000;
+    min-width: 170px;
+  }
+
+  .hud-big {
+    font-family: 'Bangers', cursive;
+    font-size: 1.9rem;
+    color: var(--gold);
+    line-height: 1;
+    text-shadow: 2px 2px 0 var(--magenta);
+  }
+
+  .hud-sub {
+    font-size: 0.82rem;
+    color: #eee;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .bar-container {
+    width: 190px;
+    height: 14px;
+    background: #222;
+    border: 2px solid #fff;
+    margin-top: 4px;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    transition: width 0.08s linear;
+  }
+
+  #stamina-fill {
+    background: linear-gradient(90deg, #00e676, #ffea00);
+  }
+
+  #stand-fill {
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  }
+
+  /* STAND CUT-IN BANNER */
+  #cutin-banner {
+    position: absolute;
+    top: 32%;
+    left: -100%;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(230,0,126,0.95), rgba(107,31,177,0.95), rgba(0,210,255,0.95));
+    border-top: 5px solid #fff;
+    border-bottom: 5px solid #fff;
+    padding: 14px 40px;
+    z-index: 25;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    box-shadow: 0 0 35px rgba(0,0,0,0.9);
+    transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  #cutin-banner.show {
+    left: 0;
+  }
+
+  .cutin-jp {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 3px 3px 0 #000;
+  }
+
+  .cutin-text {
+    font-family: 'Bangers', cursive;
+    font-size: 2.8rem;
+    letter-spacing: 3px;
+    color: #fff;
+    text-shadow: 4px 4px 0 #000;
+  }
+
+  /* CONTROLS HINT BAR */
+  #controls-bar {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(18, 13, 29, 0.88);
+    border: 2px solid var(--cyan);
+    padding: 6px 18px;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 18px;
+    pointer-events: none;
+    z-index: 10;
+    white-space: nowrap;
+  }
+
+  .key-cap {
+    background: var(--gold);
+    color: #000;
+    font-weight: 700;
+    padding: 1px 6px;
+    border: 1px solid #000;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+
+  /* FINISH MODAL */
+  #finish-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 5, 20, 0.86);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+  }
+
+  #finish-overlay.show {
+    display: flex;
+  }
+
+  .podium-box {
+    background: var(--paper);
+    color: var(--ink);
+    border: 5px solid #000;
+    box-shadow: 10px 10px 0 var(--gold);
+    padding: 24px 32px;
+    width: 540px;
+    max-width: 92vw;
+    text-align: center;
+  }
+
+  .podium-title {
+    font-family: 'Bangers', cursive;
+    font-size: 2.7rem;
+    color: var(--magenta);
+    text-shadow: 2px 2px 0 #000;
+    margin-bottom: 6px;
+  }
+
+  .results-list {
+    text-align: left;
+    margin: 14px 0;
+    border: 3px solid #000;
+    background: #fff;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 12px;
+    border-bottom: 1px solid #ddd;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .result-row.player-row {
+    background: #fff3b0;
+    color: #000;
+    border-left: 6px solid var(--magenta);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-group">
+    <div class="main-title">STEEL BALL RUN</div>
+    <div class="subtitle">JoJo's Bizarre Adventure Part 7 — Cross-America Horse &amp; Stand Race</div>
+  </div>
+  <div class="header-controls">
+    <button class="manga-btn secondary" id="muteBtn" onclick="toggleAudio()">SFX: ON</button>
+    <button class="manga-btn" id="backBtn" onclick="returnToSelect()" style="display:none;">ROSTER SELECT</button>
+  </div>
+</header>
+
+<!-- CHARACTER SELECT SCREEN -->
+<section id="select-screen" class="screen active halftone">
+  <div class="select-top">
+    <h2>CHOOSE YOUR RACER &amp; STAND (14 FIGHTERS)</h2>
+    <div style="font-size:0.95rem; color:var(--gold); font-weight:700;">
+      6,000M CROSS-CONTINENTAL DERBY &bull; 5 STAGES &bull; CORPSE PARTS &amp; STAND COMBAT
+    </div>
+  </div>
+
+  <div class="roster-layout">
+    <div class="roster-grid" id="rosterGrid"></div>
+
+    <div class="inspector-panel">
+      <div>
+        <div class="inspector-header">
+          <span class="inspector-tag" id="inspTag">PART 7 RACER</span>
+          <div class="inspector-name" id="inspName">Johnny Joestar</div>
+          <div class="inspector-stand" id="inspStand">STAND: Tusk Act 4</div>
+          <div class="inspector-mount" id="inspMount">Mount: Slow Dancer</div>
+        </div>
+
+        <div class="stat-bars">
+          <div class="stat-row">
+            <div class="stat-label"><span>Top Gallop Speed</span><span id="valSpeed">85</span></div>
+            <div class="stat-track"><div class="stat-fill" id="barSpeed" style="width:85%"></div></div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-label"><span>Horse Stamina</span><span id="valStamina">82</span></div>
+            <div class="stat-track"><div class="stat-fill" id="barStamina" style="width:82%"></div></div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-label"><span>Stand Power / Disruption</span><span id="valPower">98</span></div>
+            <div class="stat-track"><div class="stat-fill" id="barPower" style="width:98%"></div></div>
+          </div>
+        </div>
+
+        <div class="ability-box">
+          <div class="ability-title" id="inspAbilityName">INFINITE SPIN NAIL SHOT [SPACE]</div>
+          <div class="ability-desc" id="inspAbilityDesc">
+            Fires a Golden Rectangle Spin nail forward that homes in on rivals ahead, spinning them out violently and stealing momentum!
+          </div>
+        </div>
+      </div>
+
+      <button class="start-race-btn" onclick="startRace()">START STEEL BALL RUN &rarr;</button>
+    </div>
+  </div>
+</section>
+
+<!-- RACE SCREEN -->
+<section id="race-screen" class="screen">
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="hud">
+    <div class="hud-card">
+      <div class="hud-big" id="hudPlace">1ST / 8</div>
+      <div class="hud-sub" id="hudStage">STAGE 1: SAN DIEGO BEACH</div>
+      <div class="hud-sub" id="hudDist" style="color:var(--cyan); margin-top:2px;">0 / 6000 M</div>
+    </div>
+
+    <div class="hud-card" style="text-align:center;">
+      <div class="hud-big" id="hudSpeed">0 MPH</div>
+      <div class="hud-sub" id="hudCharName">JOHNNY JOESTAR</div>
+      <div class="hud-sub" id="hudStatus" style="color:#ffea00; font-weight:700;">READY</div>
+    </div>
+
+    <div class="hud-card">
+      <div class="hud-sub" style="display:flex; justify-content:space-between;">
+        <span>HORSE STAMINA</span><span id="hudStamPct">100%</span>
+      </div>
+      <div class="bar-container"><div class="bar-fill" id="stamina-fill" style="width:100%"></div></div>
+
+      <div class="hud-sub" style="display:flex; justify-content:space-between; margin-top:6px;">
+        <span id="hudStandLabel">STAND GAUGE</span><span id="hudStandPct">100%</span>
+      </div>
+      <div class="bar-container"><div class="bar-fill" id="stand-fill" style="width:100%"></div></div>
+    </div>
+  </div>
+
+  <div id="cutin-banner">
+    <span class="cutin-jp">ゴゴゴゴ</span>
+    <span class="cutin-text" id="cutinText">TUSK ACT 4! CHUMIMIN!</span>
+    <span class="cutin-jp">ドドドド</span>
+  </div>
+
+  <div id="controls-bar">
+    <span><span class="key-cap">&uarr;/&darr;</span> or <span class="key-cap">W/S</span> Change Lane</span>
+    <span><span class="key-cap">&rarr;</span> or <span class="key-cap">D</span> Spur Gallop (Uses Stamina)</span>
+    <span><span class="key-cap">&larr;</span> or <span class="key-cap">A</span> Steady Pace</span>
+    <span><span class="key-cap">SPACE</span> Activate Stand Ability</span>
+  </div>
+
+  <div id="finish-overlay">
+    <div class="podium-box">
+      <div class="podium-title" id="finishTitle">1ST PLACE — VICTORY!</div>
+      <div style="font-weight:700; color:#444;" id="finishSubtitle">New York Finish Line Reached!</div>
+      <div class="results-list" id="resultsList"></div>
+      <div style="display:flex; gap:12px; justify-content:center;">
+        <button class="manga-btn" onclick="startRace()">RACE AGAIN</button>
+        <button class="manga-btn secondary" onclick="returnToSelect()">CHANGE RACER</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ============================================================================
+// 1. COMPLETE ROSTER OF 14 PART 7 CHARACTERS & STANDS
+// ============================================================================
+const CHARACTERS = [
+  {
+    id: 'johnny',
+    name: 'Johnny Joestar',
+    stand: 'Tusk Act 4',
+    mount: 'Slow Dancer (Appaloosa)',
+    color: '#29b6f6',
+    accent: '#ff4081',
+    horseColor: '#d7ccc8',
+    tag: 'PROTAGONIST',
+    speed: 86,
+    stamina: 84,
+    power: 99,
+    abilityName: 'INFINITE ROTATION NAIL [SPACE]',
+    cutin: 'TUSK ACT 4! "CHUMIMIN~!"',
+    desc: 'Fires an Infinite Spin nail bullet down the track that homes in on rivals ahead, spinning them out violently and boosting Johnny!',
+    abilityType: 'projectile_homing'
+  },
+  {
+    id: 'gyro',
+    name: 'Gyro Zeppeli',
+    stand: 'Ball Breaker / Steel Balls',
+    mount: 'Valkyrie (Dutch Warmblood)',
+    color: '#76ff03',
+    accent: '#7c4dff',
+    horseColor: '#6d4c41',
+    tag: 'ZEPELLI SPIN',
+    speed: 90,
+    stamina: 88,
+    power: 94,
+    abilityName: 'GOLDEN RECTANGLE STEEL BALL [SPACE]',
+    cutin: 'NYO-HO! BALL BREAKER!',
+    desc: 'Hurls two bouncing Golden Spin Steel Balls across lanes that knock rivals aside and restore Valkyrie\'s stamina!',
+    abilityType: 'steel_balls'
+  },
+  {
+    id: 'diego',
+    name: 'Diego Brando',
+    stand: 'Scary Monsters',
+    mount: 'Silver Bullet (Thoroughbred)',
+    color: '#c6ff00',
+    accent: '#00bfa5',
+    horseColor: '#eceff1',
+    tag: 'DINOSAUR JOCKEY',
+    speed: 96,
+    stamina: 86,
+    power: 88,
+    abilityName: 'UTAHRAPTOR FEROCITY [SPACE]',
+    cutin: 'SCARY MONSTERS! USHAAA!',
+    desc: 'Transforms into a predatory raptor-rider, gaining massive top speed and slashing nearby racers as he passes them!',
+    abilityType: 'raptor_dash'
+  },
+  {
+    id: 'diego_au',
+    name: 'Diego Brando (AU)',
+    stand: 'THE WORLD',
+    mount: 'Silver Bullet AU',
+    color: '#ffd600',
+    accent: '#2979ff',
+    horseColor: '#fff9c4',
+    tag: 'ALTERNATE UNIVERSE',
+    speed: 94,
+    stamina: 85,
+    power: 98,
+    abilityName: 'TOKI YO TOMARE (3.5s) [SPACE]',
+    cutin: 'THE WORLD! TIME HAS STOPPED!',
+    desc: 'Freezes time completely for 3.5 seconds! All other racers halt in mid-stride while Diego gallops freely ahead!',
+    abilityType: 'time_stop'
+  },
+  {
+    id: 'hotpants',
+    name: 'Hot Pants',
+    stand: 'Cream Starter',
+    mount: 'Gets Up',
+    color: '#ff80ab',
+    accent: '#ff5252',
+    horseColor: '#8d6e63',
+    tag: 'VATICAN AGENT',
+    speed: 85,
+    stamina: 95,
+    power: 82,
+    abilityName: 'FLESH SPRAY RECOVERY [SPACE]',
+    cutin: 'CREAM STARTER! FLESH RECONSTRUCTION!',
+    desc: 'Sprays organic flesh mist to instantly refill 70% Horse Stamina, cure all debuffs, and blind rivals immediately behind!',
+    abilityType: 'heal_blind'
+  },
+  {
+    id: 'mountaintim',
+    name: 'Mountain Tim',
+    stand: 'Oh! Lonesome Me',
+    mount: 'Ghost Rider in the Sky',
+    color: '#ffb74d',
+    accent: '#8d6e63',
+    horseColor: '#a1887f',
+    tag: 'COWBOY SHERIFF',
+    speed: 84,
+    stamina: 92,
+    power: 80,
+    abilityName: 'ROPE LASSO SLINGSHOT [SPACE]',
+    cutin: 'OH! LONESOME ME! LASSO PULL!',
+    desc: 'Disassembles along his lasso rope to latch onto the racer ahead, yanking himself forward while slowing the target!',
+    abilityType: 'lasso_pull'
+  },
+  {
+    id: 'sandman',
+    name: 'Sandman (Soundman)',
+    stand: 'In a Silent Way',
+    mount: 'On Foot (No Horse!)',
+    color: '#ff7043',
+    accent: '#ffd54f',
+    horseColor: 'none',
+    tag: 'ON-FOOT RUNNER',
+    speed: 92,
+    stamina: 98,
+    power: 86,
+    abilityName: 'SONIC ECHO CONSTRUCTS [SPACE]',
+    cutin: 'IN A SILENT WAY! SOUND SLASH!',
+    desc: 'Runs tirelessly on foot without a horse! Launches stored "BOOM" and "SLASH" sound constructs across the track!',
+    abilityType: 'sound_wave'
+  },
+  {
+    id: 'pocoloco',
+    name: 'Pocoloco',
+    stand: 'Hey Ya!',
+    mount: 'Hey! Ya! (Bay)',
+    color: '#ffca28',
+    accent: '#00e676',
+    horseColor: '#6d4c41',
+    tag: '50-BILLION-TO-1 LUCK',
+    speed: 88,
+    stamina: 90,
+    power: 84,
+    abilityName: 'MIRACLE LUCK BOOST [SPACE]',
+    cutin: 'HEY YA! YOU GOT THIS, MAN!',
+    desc: 'Hey Ya! whispers the luckiest path! Grants automatic obstacle immunity, free speed surge, and instant stamina regeneration!',
+    abilityType: 'luck_boost'
+  },
+  {
+    id: 'wekapipo',
+    name: 'Wekapipo',
+    stand: 'Wrecking Ball',
+    mount: 'Verrazzano',
+    color: '#7e57c2',
+    accent: '#26c6da',
+    horseColor: '#455a64',
+    tag: 'ROYAL GUARD',
+    speed: 87,
+    stamina: 86,
+    power: 91,
+    abilityName: 'LEFT-SIDE ATAXIA [SPACE]',
+    cutin: 'WRECKING BALL! LEFT-SIDE ATAXIA!',
+    desc: 'Fires satellite spheres that inflict Left-Side Ataxia on rivals, scrambling their steering and dropping their speed!',
+    abilityType: 'ataxia'
+  },
+  {
+    id: 'valentine',
+    name: 'Funny Valentine',
+    stand: 'Dirty Deeds Done Dirt Cheap (D4C)',
+    mount: 'U.S. Presidential Steed',
+    color: '#f48fb1',
+    accent: '#2962ff',
+    horseColor: '#ffffff',
+    tag: '23RD PRESIDENT',
+    speed: 91,
+    stamina: 89,
+    power: 97,
+    abilityName: 'D4C DIMENSION HOP [SPACE]',
+    cutin: 'DOJYAA~~N! D4C DIMENSION SHIFT!',
+    desc: 'Slips between parallel dimensions under the American flag, warping forward 220 meters while phasing through all hazards!',
+    abilityType: 'dimension_warp'
+  },
+  {
+    id: 'ringo',
+    name: 'Ringo Roadagain',
+    stand: 'Mandom',
+    mount: 'Oingo',
+    color: '#ef5350',
+    accent: '#cfd8dc',
+    horseColor: '#37474f',
+    tag: 'TRUE MAN\'S WORLD',
+    speed: 86,
+    stamina: 88,
+    power: 93,
+    abilityName: 'MANDOM: 6-SECOND REWIND [SPACE]',
+    cutin: 'MANDOM! WELCOME TO THE TRUE MAN\'S WORLD!',
+    desc: 'Turns his wristwatch crown—rewinding all rival racers backward while Ringo keeps his forward momentum and stamina!',
+    abilityType: 'rewind'
+  },
+  {
+    id: 'blackmore',
+    name: 'Blackmore',
+    stand: 'Catch the Rainbow',
+    mount: 'Stormcloud Stride',
+    color: '#4fc3f7',
+    accent: '#1a237e',
+    horseColor: '#546e7a',
+    tag: 'RAIN WALKER',
+    speed: 89,
+    stamina: 87,
+    power: 87,
+    abilityName: 'RAINDOOR SKY WALK [SPACE]',
+    cutin: 'CATCH THE RAINBOW! FREEZE THE RAIN!',
+    desc: 'Summons a localized rainstorm, stepping across frozen raindrops above the mud and obstacles with zero terrain drag!',
+    abilityType: 'rain_walk'
+  },
+  {
+    id: 'robinson',
+    name: 'Mrs. Robinson',
+    stand: 'Insect Swarm (Eye-Socket)',
+    mount: 'El Condor Pasa',
+    color: '#aed581',
+    accent: '#ff6f00',
+    horseColor: '#795548',
+    tag: 'DESERT ASSASSIN',
+    speed: 85,
+    stamina: 84,
+    power: 81,
+    abilityName: 'CACTUS & BEETLE AMBUSH [SPACE]',
+    cutin: 'SWARM ATTACK! BLIND THEIR EYES!',
+    desc: 'Unleashes desert insects and rolling cacti behind and beside him, tripping up pursuing jockeys!',
+    abilityType: 'swarm_trap'
+  },
+  {
+    id: 'axlro',
+    name: 'Axl RO',
+    stand: 'Civil War',
+    mount: 'Sacrifice',
+    color: '#90a4ae',
+    accent: '#d50000',
+    horseColor: '#263238',
+    tag: 'GUILT MANIFESTATION',
+    speed: 83,
+    stamina: 91,
+    power: 90,
+    abilityName: 'PHANTOM GUILT BURDEN [SPACE]',
+    cutin: 'CIVIL WAR! BEAR YOUR SINS!',
+    desc: 'Manifests ghostly sacrifices onto nearby rivals, weighing down their mounts and slowing them dramatically!',
+    abilityType: 'guilt_weight'
+  }
+];
+
+const STAGES = [
+  { name: 'STAGE 1: SAN DIEGO BEACH', start: 0, end: 1200, sky: '#4fc3f7', ground: '#f4e0a1', track: '#e0c67c', stripe: '#c9ad63' },
+  { name: 'STAGE 2: ARIZONA DESERT', start: 1200, end: 2400, sky: '#ff8a65', ground: '#d87a4a', track: '#b85d32', stripe: '#994722' },
+  { name: 'STAGE 3: ROCKY MOUNTAINS', start: 2400, end: 3600, sky: '#7986cb', ground: '#607d8b', track: '#455a64', stripe: '#37474f' },
+  { name: 'STAGE 4: GREAT PLAINS STORM', start: 3600, end: 4800, sky: '#37474f', ground: '#388e3c', track: '#4e342e', stripe: '#3e2723' },
+  { name: 'STAGE 5: NEW YORK TRINITY FINISH', start: 4800, end: 6000, sky: '#283593', ground: '#546e7a', track: '#37474f', stripe: '#f5c542' }
+];
+
+// ============================================================================
+// 2. WEB AUDIO SYNTHESIZER (JOJO SFX & GALLOP BEATS)
+// ============================================================================
+let audioCtx = null;
+let audioEnabled = true;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function toggleAudio() {
+  audioEnabled = !audioEnabled;
+  document.getElementById('muteBtn').textContent = audioEnabled ? 'SFX: ON' : 'SFX: OFF';
+}
+
+function playSound(type) {
+  if (!audioEnabled) return;
+  initAudio();
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  if (type === 'select') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(340, now);
+    osc.frequency.exponentialRampToValueAtTime(680, now + 0.09);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    osc.start(now);
+    osc.stop(now + 0.1);
+  } else if (type === 'stand') {
+    // Dramatic JoJo Bass Drop + Synth Sting
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(42, now + 0.55);
+    gain.gain.setValueAtTime(0.32, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    osc.start(now);
+    osc.stop(now + 0.6);
+
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(520, now);
+    osc2.frequency.exponentialRampToValueAtTime(880, now + 0.25);
+    gain2.gain.setValueAtTime(0.14, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.start(now);
+    osc2.stop(now + 0.35);
+  } else if (type === 'hit') {
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(130, now);
+    osc.frequency.exponentialRampToValueAtTime(35, now + 0.25);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+    osc.start(now);
+    osc.stop(now + 0.28);
+  } else if (type === 'pickup') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, now);
+    osc.frequency.setValueAtTime(880, now + 0.08);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    osc.start(now);
+    osc.stop(now + 0.22);
+  }
+}
+
+// ============================================================================
+// 3. ROSTER UI & CHARACTER INSPECTOR
+// ============================================================================
+let selectedChar = CHARACTERS[0];
+
+function buildRoster() {
+  const grid = document.getElementById('rosterGrid');
+  grid.innerHTML = '';
+  CHARACTERS.forEach((c, idx) => {
+    const card = document.createElement('div');
+    card.className = 'char-card' + (c.id === selectedChar.id ? ' selected' : '');
+    card.onclick = () => selectCharacter(c, card);
+
+    const initials = c.name.split(' ').map(w => w[0]).slice(0, 2).join('');
+    card.innerHTML = `
+      <div class="char-badge" style="background:${c.color};">#${idx + 1}</div>
+      <div class="char-avatar" style="background:linear-gradient(135deg, ${c.color}, ${c.accent});">${initials}</div>
+      <div>
+        <div class="char-card-name">${c.name}</div>
+        <div class="char-card-stand">${c.stand}</div>
+        <div class="char-card-horse">${c.mount}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+  updateInspector(selectedChar);
+}
+
+function selectCharacter(c, cardEl) {
+  selectedChar = c;
+  playSound('select');
+  document.querySelectorAll('.char-card').forEach(el => el.classList.remove('selected'));
+  if (cardEl) cardEl.classList.add('selected');
+  updateInspector(c);
+}
+
+function updateInspector(c) {
+  document.getElementById('inspTag').textContent = c.tag;
+  document.getElementById('inspName').textContent = c.name;
+  document.getElementById('inspStand').textContent = 'STAND: ' + c.stand;
+  document.getElementById('inspMount').textContent = 'Mount: ' + c.mount;
+
+  document.getElementById('valSpeed').textContent = c.speed;
+  document.getElementById('barSpeed').style.width = c.speed + '%';
+  document.getElementById('valStamina').textContent = c.stamina;
+  document.getElementById('barStamina').style.width = c.stamina + '%';
+  document.getElementById('valPower').textContent = c.power;
+  document.getElementById('barPower').style.width = c.power + '%';
+
+  document.getElementById('inspAbilityName').textContent = c.abilityName;
+  document.getElementById('inspAbilityDesc').textContent = c.desc;
+}
+
+// ============================================================================
+// 4. GAME ENGINE STATE & LOOP
+// ============================================================================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const RACE_LENGTH = 6000; // meters
+const NUM_LANES = 5;
+let raceActive = false;
+let animFrameId = null;
+let lastTime = 0;
+
+let racers = [];
+let obstacles = [];
+let pickups = [];
+let projectiles = [];
+let particles = [];
+let katakanaList = [];
+
+let timeStopTimer = 0;
+let timeStopOwner = null;
+let cutinTimeout = null;
+let screenShake = 0;
+let finishOrder = [];
+
+const keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (!raceActive) return;
+
+  if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+    changePlayerLane(-1);
+  } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+    changePlayerLane(1);
+  } else if (e.code === 'Space') {
+    e.preventDefault();
+    triggerStandAbility(racers[0]);
+  }
+});
+window.addEventListener('keyup', e => {
+  keys[e.code] = false;
+});
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight - 58;
+}
+window.addEventListener('resize', resizeCanvas);
+
+function changePlayerLane(delta) {
+  const player = racers[0];
+  if (!player || player.finished) return;
+  const dir = player.ataxiaTimer > 0 ? -delta : delta;
+  player.targetLane = Math.max(0, Math.min(NUM_LANES - 1, player.targetLane + dir));
+}
+
+function triggerCutin(text) {
+  const banner = document.getElementById('cutin-banner');
+  document.getElementById('cutinText').textContent = text;
+  banner.classList.add('show');
+  clearTimeout(cutinTimeout);
+  cutinTimeout = setTimeout(() => {
+    banner.classList.remove('show');
+  }, 1900);
+}
+
+function spawnKatakana(x, y, text, color) {
+  katakanaList.push({
+    x, y, text, color,
+    vy: -35 - Math.random() * 25,
+    life: 1.4,
+    maxLife: 1.4,
+    scale: 0.9 + Math.random() * 0.5
+  });
+}
+
+function spawnParticles(x, y, color, count = 14) {
+  for (let i = 0; i < count; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const spd = 60 + Math.random() * 180;
+    particles.push({
+      x, y,
+      vx: Math.cos(ang) * spd,
+      vy: Math.sin(ang) * spd,
+      color,
+      size: 4 + Math.random() * 6,
+      life: 0.5 + Math.random() * 0.4
+    });
+  }
+}
+
+function startRace() {
+  initAudio();
+  playSound('stand');
+  resizeCanvas();
+
+  document.getElementById('select-screen').classList.remove('active');
+  document.getElementById('race-screen').classList.add('active');
+  document.getElementById('backBtn').style.display = 'inline-block';
+  document.getElementById('finish-overlay').classList.remove('show');
+
+  // Pick 7 AI rivals from the remaining 13 characters
+  const pool = CHARACTERS.filter(c => c.id !== selectedChar.id);
+  pool.sort(() => Math.random() - 0.5);
+  const chosenRivals = pool.slice(0, 7);
+
+  const allContestants = [selectedChar, ...chosenRivals];
+  racers = allContestants.map((char, idx) => ({
+    char,
+    isPlayer: idx === 0,
+    lane: idx % NUM_LANES,
+    targetLane: idx % NUM_LANES,
+    visualLane: idx % NUM_LANES,
+    dist: 0,
+    speed: 0,
+    baseMaxSpeed: 145 + (char.speed - 80) * 2.1,
+    stamina: 100,
+    maxStamina: 85 + char.stamina * 0.35,
+    standCharge: 100,
+    spinOutTimer: 0,
+    boostTimer: 0,
+    ataxiaTimer: 0,
+    phaseTimer: 0,
+    aiCooldown: 3 + Math.random() * 5,
+    animPhase: Math.random() * 10,
+    finished: false,
+    finishTime: 0
+  }));
+
+  obstacles = [];
+  pickups = [];
+  projectiles = [];
+  particles = [];
+  katakanaList = [];
+  finishOrder = [];
+  timeStopTimer = 0;
+  timeStopOwner = null;
+  screenShake = 0;
+
+  // Populate track hazards & Holy Corpse / Golden Spin pickups along 6000m
+  for (let d = 280; d < RACE_LENGTH - 150; d += 115) {
+    const lane = Math.floor(Math.random() * NUM_LANES);
+    const kind = Math.random() < 0.55 ? 'rock' : 'cactus';
+    obstacles.push({ dist: d, lane, kind, hit: false });
+
+    if (Math.random() < 0.42) {
+      const pLane = (lane + 1 + Math.floor(Math.random() * 3)) % NUM_LANES;
+      const pType = Math.random() < 0.55 ? 'corpse' : 'apple';
+      pickups.push({ dist: d + 45, lane: pLane, type: pType, taken: false });
+    }
+  }
+
+  document.getElementById('hudCharName').textContent = selectedChar.name.toUpperCase();
+  document.getElementById('hudStandLabel').textContent = selectedChar.stand.toUpperCase();
+  triggerCutin(`STEEL BALL RUN START! — ${selectedChar.name.toUpperCase()}`);
+
+  raceActive = true;
+  lastTime = performance.now();
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  animFrameId = requestAnimationFrame(gameLoop);
+}
+
+function returnToSelect() {
+  raceActive = false;
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  document.getElementById('race-screen').classList.remove('active');
+  document.getElementById('select-screen').classList.add('active');
+  document.getElementById('backBtn').style.display = 'none';
+  document.getElementById('finish-overlay').classList.remove('show');
+}
+
+// ============================================================================
+// 5. STAND ABILITIES IMPLEMENTATION (ALL 14 UNIQUE EFFECTS)
+// ============================================================================
+function triggerStandAbility(user) {
+  if (!user || user.finished || user.standCharge < 100) return;
+  if (timeStopTimer > 0 && timeStopOwner !== user) return;
+
+  user.standCharge = 0;
+  const type = user.char.abilityType;
+
+  if (user.isPlayer) {
+    playSound('stand');
+    triggerCutin(user.char.cutin);
+    screenShake = 12;
+  }
+
+  const others = racers.filter(r => r !== user && !r.finished);
+
+  if (type === 'projectile_homing') {
+    // Johnny Joestar: Tusk Act 4 Infinite Spin Nail
+    user.boostTimer = 2.2;
+    projectiles.push({
+      owner: user, dist: user.dist + 10, lane: user.visualLane,
+      speed: 360, color: '#ff4081', label: 'CHUMIMIN!', homing: true, life: 3.5
+    });
+  } else if (type === 'steel_balls') {
+    // Gyro Zeppeli: Twin Golden Spin Steel Balls + Stamina Restore
+    user.stamina = Math.min(user.maxStamina, user.stamina + 35);
+    user.boostTimer = 1.8;
+    [-0.6, 0.6].forEach(offset => {
+      projectiles.push({
+        owner: user, dist: user.dist + 12,
+        lane: Math.max(0, Math.min(NUM_LANES - 1, user.visualLane + offset)),
+        speed: 330, color: '#76ff03', label: 'SPIN!', homing: false, life: 3.0
+      });
+    });
+  } else if (type === 'raptor_dash') {
+    // Diego Brando: Scary Monsters Dinosaur Surge
+    user.boostTimer = 3.8;
+    user.phaseTimer = 2.0;
+    others.forEach(r => {
+      if (Math.abs(r.dist - user.dist) < 90 && Math.abs(r.visualLane - user.visualLane) < 1.2) {
+        r.spinOutTimer = 1.6;
+      }
+    });
+  } else if (type === 'time_stop') {
+    // Diego Brando AU: THE WORLD
+    timeStopTimer = 3.5;
+    timeStopOwner = user;
+    user.boostTimer = 3.5;
+  } else if (type === 'heal_blind') {
+    // Hot Pants: Cream Starter
+    user.stamina = Math.min(user.maxStamina, user.stamina + 70);
+    user.spinOutTimer = 0;
+    user.ataxiaTimer = 0;
+    user.boostTimer = 2.2;
+    others.forEach(r => {
+      if (user.dist - r.dist > 0 && user.dist - r.dist < 140) {
+        r.spinOutTimer = 1.5;
+      }
+    });
+  } else if (type === 'lasso_pull') {
+    // Mountain Tim: Oh! Lonesome Me
+    const ahead = others.filter(r => r.dist > user.dist).sort((a, b) => a.dist - b.dist)[0];
+    if (ahead) {
+      const pullDist = Math.min(180, (ahead.dist - user.dist) * 0.75);
+      user.dist += pullDist;
+      ahead.spinOutTimer = 1.4;
+    }
+    user.boostTimer = 2.4;
+  } else if (type === 'sound_wave') {
+    // Sandman: In a Silent Way
+    user.boostTimer = 2.5;
+    for (let l = 0; l < NUM_LANES; l += 2) {
+      projectiles.push({
+        owner: user, dist: user.dist + 10, lane: l,
+        speed: 310, color: '#ff7043', label: 'DOOM!', homing: false, life: 2.8
+      });
+    }
+  } else if (type === 'luck_boost') {
+    // Pocoloco: Hey Ya!
+    user.boostTimer = 4.2;
+    user.phaseTimer = 4.2;
+    user.stamina = user.maxStamina;
+  } else if (type === 'ataxia') {
+    // Wekapipo: Wrecking Ball Left-Side Ataxia
+    others.forEach(r => {
+      if (Math.abs(r.dist - user.dist) < 260) {
+        r.ataxiaTimer = 4.0;
+        r.speed *= 0.68;
+      }
+    });
+    user.boostTimer = 2.0;
+  } else if (type === 'dimension_warp') {
+    // Funny Valentine: D4C Dimension Shift
+    user.dist = Math.min(RACE_LENGTH - 30, user.dist + 220);
+    user.phaseTimer = 3.2;
+    user.boostTimer = 2.5;
+  } else if (type === 'rewind') {
+    // Ringo Roadagain: Mandom 6-Second Rewind
+    others.forEach(r => {
+      if (Math.abs(r.dist - user.dist) < 350) {
+        r.dist = Math.max(0, r.dist - 125);
+        r.spinOutTimer = 1.0;
+      }
+    });
+    user.stamina = Math.min(user.maxStamina, user.stamina + 30);
+    user.boostTimer = 2.0;
+  } else if (type === 'rain_walk') {
+    // Blackmore: Catch the Rainbow
+    user.phaseTimer = 4.5;
+    user.boostTimer = 3.6;
+  } else if (type === 'swarm_trap') {
+    // Mrs. Robinson: Insect Swarm
+    user.boostTimer = 2.3;
+    for (let l = 0; l < NUM_LANES; l++) {
+      if (l !== Math.round(user.visualLane)) {
+        obstacles.push({ dist: user.dist + 35, lane: l, kind: 'cactus', hit: false });
+      }
+    }
+  } else if (type === 'guilt_weight') {
+    // Axl RO: Civil War
+    others.forEach(r => {
+      if (Math.abs(r.dist - user.dist) < 280) {
+        r.spinOutTimer = 2.1;
+        r.stamina = Math.max(10, r.stamina - 30);
+      }
+    });
+    user.boostTimer = 2.2;
+  }
+}
+
+// ============================================================================
+// 6. UPDATE SIMULATION
+// ============================================================================
+let raceTimer = 0;
+
+function gameLoop(now) {
+  if (!raceActive) return;
+  const dt = Math.min(0.05, (now - lastTime) / 1000);
+  lastTime = now;
+
+  update(dt);
+  render();
+
+  animFrameId = requestAnimationFrame(gameLoop);
+}
+
+function update(dt) {
+  raceTimer += dt;
+
+  if (timeStopTimer > 0) {
+    timeStopTimer -= dt;
+    if (timeStopTimer <= 0) {
+      timeStopTimer = 0;
+      timeStopOwner = null;
+    }
+  }
+
+  if (screenShake > 0) screenShake = Math.max(0, screenShake - dt * 35);
+
+  const player = racers[0];
+
+  // Update racers
+  racers.forEach((r, idx) => {
+    if (r.finished) return;
+
+    const frozenByTimeStop = timeStopTimer > 0 && timeStopOwner !== r;
+    if (frozenByTimeStop) return;
+
+    // Timers
+    if (r.spinOutTimer > 0) r.spinOutTimer -= dt;
+    if (r.boostTimer > 0) r.boostTimer -= dt;
+    if (r.ataxiaTimer > 0) r.ataxiaTimer -= dt;
+    if (r.phaseTimer > 0) r.phaseTimer -= dt;
+
+    // Charge Stand gauge passively
+    r.standCharge = Math.min(100, r.standCharge + dt * (8.5 + r.char.power * 0.05));
+
+    // Smooth lane transition
+    r.visualLane += (r.targetLane - r.visualLane) * Math.min(1, dt * 11);
+
+    // Controls vs AI
+    let desiredSpeed = r.baseMaxSpeed * 0.78;
+    let spurring = false;
+
+    if (r.isPlayer) {
+      if ((keys['ArrowRight'] || keys['KeyD']) && r.stamina > 2) {
+        spurring = true;
+        desiredSpeed = r.baseMaxSpeed * 1.15;
+      } else if (keys['ArrowLeft'] || keys['KeyA']) {
+        desiredSpeed = r.baseMaxSpeed * 0.62;
+      }
+    } else {
+      // AI Logic
+      const aheadObs = obstacles.find(o => !o.hit && o.lane === r.targetLane && o.dist > r.dist && o.dist - r.dist < 95);
+      if (aheadObs) {
+        const nextLane = r.targetLane > 0 ? r.targetLane - 1 : r.targetLane + 1;
+        r.targetLane = nextLane;
+      }
+      if (r.stamina > 35 && (player.dist - r.dist > 40 || r.dist > RACE_LENGTH - 900)) {
+        spurring = true;
+        desiredSpeed = r.baseMaxSpeed * 1.12;
+      }
+      r.aiCooldown -= dt;
+      if (r.standCharge >= 100 && r.aiCooldown <= 0) {
+        triggerStandAbility(r);
+        r.aiCooldown = 6 + Math.random() * 5;
+      }
+    }
+
+    // Stamina management
+    if (spurring) {
+      r.stamina = Math.max(0, r.stamina - dt * 16);
+    } else {
+      r.stamina = Math.min(r.maxStamina, r.stamina + dt * 11);
+    }
+
+    if (r.stamina <= 2) {
+      desiredSpeed = r.baseMaxSpeed * 0.56; // Exhausted slowdown
+    }
+
+    if (r.boostTimer > 0) desiredSpeed *= 1.32;
+    if (r.spinOutTimer > 0) desiredSpeed *= 0.35;
+
+    r.speed += (desiredSpeed - r.speed) * Math.min(1, dt * 5);
+    r.dist += r.speed * dt;
+    r.animPhase += (r.speed * 0.09) * dt;
+
+    // Menacing katakana trail during boost
+    if (r.boostTimer > 0 && Math.random() < 0.25) {
+      const screenX = getRacerScreenX(r, player);
+      const screenY = getLaneY(r.visualLane);
+      spawnKatakana(screenX - 20, screenY - 30, Math.random() < 0.5 ? 'ゴゴゴ' : 'ドドド', r.char.color);
+    }
+
+    // Check Finish Line
+    if (r.dist >= RACE_LENGTH) {
+      r.dist = RACE_LENGTH;
+      r.finished = true;
+      r.finishTime = raceTimer;
+      finishOrder.push(r);
+      if (r.isPlayer) {
+        endRace();
+      }
+    }
+
+    // Obstacle collisions
+    if (r.phaseTimer <= 0 && r.spinOutTimer <= 0) {
+      obstacles.forEach(o => {
+        if (!o.hit && Math.abs(o.dist - r.dist) < 16 && Math.abs(o.lane - r.visualLane) < 0.45) {
+          o.hit = true;
+          r.spinOutTimer = 1.25;
+          r.speed *= 0.4;
+          if (r.isPlayer) {
+            playSound('hit');
+            screenShake = 10;
+            spawnParticles(getRacerScreenX(r, player), getLaneY(r.visualLane), '#ff5252', 18);
+          }
+        }
+      });
+    }
+
+    // Pickup collisions (Holy Corpse Parts & Golden Apples)
+    pickups.forEach(p => {
+      if (!p.taken && Math.abs(p.dist - r.dist) < 20 && Math.abs(p.lane - r.visualLane) < 0.55) {
+        p.taken = true;
+        if (p.type === 'corpse') {
+          r.standCharge = Math.min(100, r.standCharge + 45);
+          r.boostTimer = Math.max(r.boostTimer, 1.4);
+        } else {
+          r.stamina = Math.min(r.maxStamina, r.stamina + 45);
+        }
+        if (r.isPlayer) {
+          playSound('pickup');
+          const sx = getRacerScreenX(r, player);
+          const sy = getLaneY(r.visualLane);
+          spawnParticles(sx, sy, '#ffd740', 16);
+          spawnKatakana(sx, sy - 40, p.type === 'corpse' ? 'CORPSE PART!' : 'STAMINA UP!', '#ffd740');
+        }
+      }
+    });
+  });
+
+  // Update Stand Projectiles
+  projectiles.forEach(proj => {
+    proj.life -= dt;
+    proj.dist += proj.speed * dt;
+
+    if (proj.homing) {
+      const target = racers.find(r => r !== proj.owner && !r.finished && r.dist > proj.dist - 20);
+      if (target) {
+        proj.lane += (target.visualLane - proj.lane) * Math.min(1, dt * 6);
+      }
+    }
+
+    racers.forEach(r => {
+      if (r !== proj.owner && !r.finished && r.phaseTimer <= 0) {
+        if (Math.abs(r.dist - proj.dist) < 22 && Math.abs(r.visualLane - proj.lane) < 0.55) {
+          r.spinOutTimer = 1.6;
+          r.speed *= 0.35;
+          proj.life = 0;
+          if (proj.owner.isPlayer || r.isPlayer) {
+            playSound('hit');
+            spawnParticles(getRacerScreenX(r, player), getLaneY(r.visualLane), proj.color, 20);
+          }
+        }
+      }
+    });
+  });
+  projectiles = projectiles.filter(p => p.life > 0);
+
+  // Update Particles & Floating Katakana
+  particles.forEach(pt => {
+    pt.x += pt.vx * dt;
+    pt.y += pt.vy * dt;
+    pt.life -= dt;
+  });
+  particles = particles.filter(pt => pt.life > 0);
+
+  katakanaList.forEach(k => {
+    k.y += k.vy * dt;
+    k.life -= dt;
+  });
+  katakanaList = katakanaList.filter(k => k.life > 0);
+
+  updateHUD(player);
+}
+
+function updateHUD(player) {
+  const sorted = [...racers].sort((a, b) => b.dist - a.dist);
+  const rank = sorted.indexOf(player) + 1;
+  const suffixes = ['ST', 'ND', 'RD', 'TH', 'TH', 'TH', 'TH', 'TH'];
+  document.getElementById('hudPlace').textContent = `${rank}${suffixes[rank - 1]} / ${racers.length}`;
+
+  const stage = STAGES.find(s => player.dist >= s.start && player.dist <= s.end) || STAGES[STAGES.length - 1];
+  document.getElementById('hudStage').textContent = stage.name;
+  document.getElementById('hudDist').textContent = `${Math.floor(player.dist)} / ${RACE_LENGTH} M`;
+
+  const mph = Math.round(player.speed * 0.28);
+  document.getElementById('hudSpeed').textContent = `${mph} MPH`;
+
+  let status = 'GALLOPING';
+  if (timeStopTimer > 0) status = 'TIME STOPPED!';
+  else if (player.spinOutTimer > 0) status = 'SPUN OUT!';
+  else if (player.ataxiaTimer > 0) status = 'LEFT-SIDE ATAXIA!';
+  else if (player.boostTimer > 0) status = 'STAND OVERDRIVE!';
+  else if (player.stamina <= 5) status = 'HORSE EXHAUSTED!';
+  document.getElementById('hudStatus').textContent = status;
+
+  const stamPct = Math.round((player.stamina / player.maxStamina) * 100);
+  document.getElementById('hudStamPct').textContent = `${stamPct}%`;
+  document.getElementById('stamina-fill').style.width = `${stamPct}%`;
+
+  const standPct = Math.round(player.standCharge);
+  document.getElementById('hudStandPct').textContent = standPct >= 100 ? 'READY [SPACE]' : `${standPct}%`;
+  document.getElementById('stand-fill').style.width = `${standPct}%`;
+}
+
+function endRace() {
+  raceActive = false;
+  // Estimate finish times for remaining AI racers
+  const remaining = racers.filter(r => !r.finished).sort((a, b) => b.dist - a.dist);
+  remaining.forEach((r, idx) => {
+    r.finishTime = raceTimer + ((RACE_LENGTH - r.dist) / Math.max(80, r.speed)) + idx * 0.15;
+    finishOrder.push(r);
+  });
+
+  const playerRank = finishOrder.findIndex(r => r.isPlayer) + 1;
+  document.getElementById('finishTitle').textContent =
+    playerRank === 1 ? '1ST PLACE — $50,000,000 WINNER!' : `FINISHED #${playerRank} IN NEW YORK!`;
+  document.getElementById('finishSubtitle').textContent =
+    `${selectedChar.name} & ${selectedChar.stand} — Final Time: ${finishOrder[playerRank - 1].finishTime.toFixed(2)}s`;
+
+  const list = document.getElementById('resultsList');
+  list.innerHTML = '';
+  finishOrder.forEach((r, idx) => {
+    const row = document.createElement('div');
+    row.className = 'result-row' + (r.isPlayer ? ' player-row' : '');
+    row.innerHTML = `
+      <span>#${idx + 1} ${r.char.name} <small style="color:#666;">(${r.char.stand})</small></span>
+      <span>${r.finishTime.toFixed(2)}s</span>
+    `;
+    list.appendChild(row);
+  });
+
+  document.getElementById('finish-overlay').classList.add('show');
+}
+
+// ============================================================================
+// 7. MANGA-STYLED 2.5D RENDERING ENGINE
+// ============================================================================
+function getLaneY(laneIdx) {
+  const trackTop = canvas.height * 0.36;
+  const trackHeight = canvas.height * 0.56;
+  const laneH = trackHeight / NUM_LANES;
+  return trackTop + laneH * (laneIdx + 0.55);
+}
+
+function getRacerScreenX(racer, player) {
+  const playerAnchorX = canvas.width * 0.26;
+  const pixelsPerMeter = 3.2;
+  return playerAnchorX + (racer.dist - player.dist) * pixelsPerMeter;
+}
+
+function render() {
+  const player = racers[0];
+  if (!player) return;
+
+  const stage = STAGES.find(s => player.dist >= s.start && player.dist <= s.end) || STAGES[STAGES.length - 1];
+
+  ctx.save();
+  if (screenShake > 0) {
+    ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
+  }
+
+  // 1. SKY & PARALLAX MOUNTAINS / LANDMARKS
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.36);
+  skyGrad.addColorStop(0, '#1a0b2e');
+  skyGrad.addColorStop(1, stage.sky);
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height * 0.36);
+
+  // Sun / Manga Halftone Orb
+  ctx.fillStyle = '#f5c542';
+  ctx.beginPath();
+  ctx.arc(canvas.width * 0.78, canvas.height * 0.14, 46, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#000';
+  ctx.stroke();
+
+  // Parallax Mesa / Skyline Silhouettes
+  const trackTop = canvas.height * 0.36;
+  ctx.fillStyle = 'rgba(18, 13, 29, 0.55)';
+  for (let i = -1; i < 8; i++) {
+    const mx = ((i * 260) - (player.dist * 0.45) % 260);
+    ctx.beginPath();
+    ctx.moveTo(mx, trackTop);
+    ctx.lineTo(mx + 60, trackTop - 75);
+    ctx.lineTo(mx + 150, trackTop - 75);
+    ctx.lineTo(mx + 220, trackTop);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // 2. TRACK & LANES
+  ctx.fillStyle = stage.track;
+  ctx.fillRect(0, trackTop, canvas.width, canvas.height - trackTop);
+
+  const trackHeight = canvas.height * 0.56;
+  const laneH = trackHeight / NUM_LANES;
+
+  // Scrolling ground markers & lane dividers
+  const scrollOffset = (player.dist * 3.2) % 120;
+  for (let l = 0; l <= NUM_LANES; l++) {
+    const y = trackTop + l * laneH;
+    ctx.strokeStyle = l === 0 || l === NUM_LANES ? '#000' : 'rgba(0,0,0,0.28)';
+    ctx.lineWidth = l === 0 || l === NUM_LANES ? 4 : 2;
+    ctx.setLineDash(l === 0 || l === NUM_LANES ? [] : [24, 18]);
+    ctx.lineDashOffset = scrollOffset;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Distance Mileposts every 200m
+  const firstPost = Math.floor((player.dist - 100) / 200) * 200;
+  for (let d = firstPost; d < player.dist + 400; d += 200) {
+    if (d <= 0) continue;
+    const px = canvas.width * 0.26 + (d - player.dist) * 3.2;
+    ctx.fillStyle = d >= RACE_LENGTH ? '#f5c542' : '#fff';
+    ctx.fillRect(px - 3, trackTop - 34, 6, 34);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(px - 28, trackTop - 52, 56, 20);
+    ctx.fillStyle = '#f5c542';
+    ctx.font = 'bold 12px Oswald';
+    ctx.textAlign = 'center';
+    ctx.fillText(d >= RACE_LENGTH ? 'FINISH!' : `${d}M`, px, trackTop - 38);
+  }
+
+  // 3. DRAW PICKUPS & OBSTACLES
+  pickups.forEach(p => {
+    if (p.taken) return;
+    const sx = canvas.width * 0.26 + (p.dist - player.dist) * 3.2;
+    if (sx < -50 || sx > canvas.width + 50) return;
+    const sy = getLaneY(p.lane);
+
+    ctx.save();
+    ctx.translate(sx, sy + Math.sin(raceTimer * 6 + p.dist) * 4);
+    ctx.fillStyle = p.type === 'corpse' ? '#ff4081' : '#00e676';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, 13, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px Oswald';
+    ctx.textAlign = 'center';
+    ctx.fillText(p.type === 'corpse' ? '★' : '+HP', 0, 4);
+    ctx.restore();
+  });
+
+  obstacles.forEach(o => {
+    if (o.hit) return;
+    const sx = canvas.width * 0.26 + (o.dist - player.dist) * 3.2;
+    if (sx < -60 || sx > canvas.width + 60) return;
+    const sy = getLaneY(o.lane);
+
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    if (o.kind === 'rock') {
+      ctx.fillStyle = '#78909c';
+      ctx.beginPath();
+      ctx.moveTo(-18, 12);
+      ctx.lineTo(-10, -14);
+      ctx.lineTo(12, -12);
+      ctx.lineTo(20, 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = '#2e7d32';
+      ctx.fillRect(-7, -22, 14, 34);
+      ctx.strokeRect(-7, -22, 14, 34);
+      ctx.fillRect(-16, -12, 9, 6);
+      ctx.fillRect(7, -16, 9, 6);
+    }
+    ctx.restore();
+  });
+
+  // 4. DRAW RACERS (DEPTH-SORTED BY LANE)
+  const renderOrder = [...racers].sort((a, b) => a.visualLane - b.visualLane);
+  renderOrder.forEach(r => {
+    const sx = getRacerScreenX(r, player);
+    if (sx < -140 || sx > canvas.width + 140) return;
+    const sy = getLaneY(r.visualLane);
+    drawRacer(r, sx, sy);
+  });
+
+  // 5. DRAW STAND PROJECTILES
+  projectiles.forEach(proj => {
+    const sx = canvas.width * 0.26 + (proj.dist - player.dist) * 3.2;
+    const sy = getLaneY(proj.lane);
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.fillStyle = proj.color;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px Bangers';
+    ctx.textAlign = 'center';
+    ctx.fillText(proj.label, 0, -16);
+    ctx.restore();
+  });
+
+  // 6. PARTICLES & KATAKANA SOUND EFFECTS
+  particles.forEach(pt => {
+    ctx.fillStyle = pt.color;
+    ctx.fillRect(pt.x, pt.y, pt.size, pt.size);
+  });
+
+  katakanaList.forEach(k => {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, k.life / k.maxLife);
+    ctx.font = `900 ${Math.round(22 * k.scale)}px sans-serif`;
+    ctx.fillStyle = k.color;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.strokeText(k.text, k.x, k.y);
+    ctx.fillText(k.text, k.x, k.y);
+    ctx.restore();
+  });
+
+  // 7. TIME STOP INVERTED OVERLAY ("THE WORLD")
+  if (timeStopTimer > 0) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(25, 118, 210, 0.24)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#ffd600';
+    ctx.lineWidth = 10;
+    ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+    ctx.restore();
+  }
+
+  // 8. MANGA SPEED LINES WHEN BOOSTING
+  if (player.boostTimer > 0) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 16; i++) {
+      const ly = (i * 53 + raceTimer * 400) % canvas.height;
+      ctx.beginPath();
+      ctx.moveTo(0, ly);
+      ctx.lineTo(140, ly);
+      ctx.moveTo(canvas.width, ly);
+      ctx.lineTo(canvas.width - 140, ly);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // 9. MINI-MAP PROGRESS BAR AT BOTTOM OF TRACK
+  drawMinimap(player);
+
+  ctx.restore();
+}
+
+function drawRacer(r, x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  if (r.phaseTimer > 0) ctx.globalAlpha = 0.6;
+  if (r.spinOutTimer > 0) {
+    ctx.rotate(Math.sin(raceTimer * 28) * 0.45);
+  }
+
+  const bounce = Math.abs(Math.sin(r.animPhase)) * 6;
+
+  // Ground Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(0, 16, 30, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (r.char.horseColor === 'none') {
+    // Sandman running on foot!
+    ctx.translate(0, -bounce);
+    ctx.fillStyle = r.char.color;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2.5;
+    ctx.fillRect(-10, -28, 20, 28);
+    ctx.strokeRect(-10, -28, 20, 28);
+    // Head
+    ctx.fillStyle = '#d7a87e';
+    ctx.beginPath();
+    ctx.arc(2, -36, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    // Stylized Manga Steed
+    ctx.save();
+    ctx.translate(0, -bounce);
+    ctx.fillStyle = r.char.horseColor;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2.5;
+
+    // Horse Body
+    ctx.beginPath();
+    ctx.roundRect(-26, -16, 48, 20, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    // Horse Neck & Head
+    ctx.beginPath();
+    ctx.moveTo(14, -12);
+    ctx.lineTo(28, -28);
+    ctx.lineTo(36, -22);
+    ctx.lineTo(24, -4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Animated Galloping Legs
+    const legSwing = Math.sin(r.animPhase) * 10;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-18, 4); ctx.lineTo(-18 - legSwing, 18);
+    ctx.moveTo(14, 4); ctx.lineTo(14 + legSwing, 18);
+    ctx.stroke();
+
+    // Jockey Torso & Hat
+    ctx.fillStyle = r.char.color;
+    ctx.lineWidth = 2;
+    ctx.fillRect(-10, -34, 18, 20);
+    ctx.strokeRect(-10, -34, 18, 20);
+
+    ctx.fillStyle = r.char.accent;
+    ctx.beginPath();
+    ctx.arc(0, -41, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Stand Aura Silhouette when boosting
+    if (r.boostTimer > 0) {
+      ctx.strokeStyle = r.char.color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(-6, -26, 36, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Name Tag & Player Indicator
+  ctx.fillStyle = r.isPlayer ? '#f5c542' : 'rgba(0,0,0,0.75)';
+  ctx.fillRect(-42, -66, 84, 16);
+  ctx.fillStyle = r.isPlayer ? '#000' : '#fff';
+  ctx.font = 'bold 11px Oswald';
+  ctx.textAlign = 'center';
+  ctx.fillText(r.isPlayer ? `▼ ${r.char.name.split(' ')[0].toUpperCase()}` : r.char.name.split(' ')[0], 0, -54);
+
+  ctx.restore();
+}
+
+function drawMinimap(player) {
+  const barW = canvas.width * 0.68;
+  const barH = 12;
+  const x0 = (canvas.width - barW) / 2;
+  const y0 = canvas.height - 46;
+
+  ctx.fillStyle = 'rgba(0,0,0,0.75)';
+  ctx.fillRect(x0 - 4, y0 - 4, barW + 8, barH + 8);
+  ctx.strokeStyle = '#f5c542';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x0 - 4, y0 - 4, barW + 8, barH + 8);
+
+  racers.forEach(r => {
+    const rx = x0 + (r.dist / RACE_LENGTH) * barW;
+    ctx.fillStyle = r.isPlayer ? '#f5c542' : r.char.color;
+    ctx.beginPath();
+    ctx.arc(rx, y0 + barH / 2, r.isPlayer ? 7 : 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+}
+
+// Initialize Roster on load
+buildRoster();
+</script>
+</body>
+</html>
